@@ -12,7 +12,7 @@ async function bootstrap() {
 
   // Serve static files from uploads directory
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
+    prefix: '/uploads/'
   });
 
   // Global validation pipe
@@ -20,8 +20,8 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true,
-    }),
+      transform: true
+    })
   );
 
   // Global interceptor to disable HTTP cache (prevent 304 responses)
@@ -34,13 +34,14 @@ async function bootstrap() {
   // CORS configuration
   app.enableCors({
     origin: true,
-    credentials: true,
+    credentials: true
   });
 
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('Young Adults Educational Center Backend')
-    .setDescription(`
+    .setDescription(
+      `
       Complete API documentation for Young Adults Educational Center Backend.
       
       ## Authentication
@@ -65,7 +66,8 @@ async function bootstrap() {
       - **about**: About page content
       - **contact**: Contact form submissions
       - **upload**: File upload functionality
-    `)
+    `
+    )
     .setVersion('1.0.0')
     .addBearerAuth(
       {
@@ -74,9 +76,9 @@ async function bootstrap() {
         bearerFormat: 'JWT',
         name: 'JWT',
         description: 'Enter JWT token obtained from /auth/login endpoint',
-        in: 'header',
+        in: 'header'
       },
-      'JWT-auth',
+      'JWT-auth'
     )
     .addTag('health', 'Health check endpoints')
     .addTag('auth', 'Authentication endpoints')
@@ -94,37 +96,38 @@ async function bootstrap() {
     .build();
 
   const baseDocument = SwaggerModule.createDocument(app, config);
-  
+  //nima muamo
   // Create dynamic Swagger JSON endpoint that uses current domain
   app.getHttpAdapter().get('/api-json', (req: Request, res: Response) => {
     // Get the current origin from the request
     // Handle proxy headers (X-Forwarded-Proto, X-Forwarded-Host)
     const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
-    const host = req.get('x-forwarded-host') || req.get('host') || 'localhost:3000';
+    const host =
+      req.get('x-forwarded-host') || req.get('host') || 'localhost:3000';
     const origin = `${protocol}://${host}`;
-    
+
     // Clone document and set servers dynamically
     const dynamicDocument = {
       ...baseDocument,
       servers: [
         {
           url: origin,
-          description: 'Current server',
-        },
-      ],
+          description: 'Current server'
+        }
+      ]
     };
-    
+
     res.setHeader('Content-Type', 'application/json');
     res.send(dynamicDocument);
   });
-  
+
   // Configure Swagger to use current domain automatically
   SwaggerModule.setup('api', app, baseDocument, {
     swaggerOptions: {
       persistAuthorization: true,
-      url: '/api-json',
+      url: '/api-json'
     },
-    customSiteTitle: 'Young Adults API Documentation',
+    customSiteTitle: 'Young Adults API Documentation'
   });
 
   const port = process.env.PORT || 3000;
@@ -136,4 +139,3 @@ async function bootstrap() {
 }
 
 bootstrap();
-
