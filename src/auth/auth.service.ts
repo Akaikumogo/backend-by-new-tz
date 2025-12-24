@@ -1,15 +1,12 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { UsersService } from '../users/users.service';
-import { RegisterDto } from './dto/register.dto';
+import { UsersService } from '../users/user.service';
 import { LoginDto } from './dto/login.dto';
-import { Role } from '../common/enums/role.enum';
+import { RegisterDto } from './dto/register.dto';
+import { RegisterStudentDto } from './dto/register-student.dto';
+import { UserDocument } from '../users/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -19,65 +16,10 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async register(registerDto: RegisterDto) {
-    const { email, phone, password, full_name } = registerDto;
-
-    // Check if user exists
-    const existingUser = await this.usersService.findByEmailOrPhone(email, phone);
-    if (existingUser) {
-      throw new ConflictException('User with this email or phone already exists');
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const user = await this.usersService.create({
-      email,
-      phone,
-      password: hashedPassword,
-      full_name,
-      role: Role.USER,
-    });
-
-    // Generate tokens
-    const token = this.generateToken(user._id.toString());
-    const refreshToken = this.generateRefreshToken(user._id.toString());
-
-    // Save refresh token
-    await this.usersService.updateRefreshToken(user._id.toString(), refreshToken);
-
-    return {
-      user: this.usersService.sanitizeUser(user),
-      token,
-      refresh_token: refreshToken,
-    };
-  }
-
-  async login(loginDto: LoginDto) {
-    const { login, password } = loginDto;
-
-    // Determine if login is email or phone
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(login);
-    const isPhone = /^\+998\d{9}$/.test(login);
-
-    let user;
-    if (isEmail) {
-      // For admin: login with email
-      user = await this.usersService.findByEmail(login);
-    } else if (isPhone) {
-      // For other users: login with phone
-      user = await this.usersService.findByPhone(login);
-    } else {
-      throw new UnauthorizedException('Invalid login format. Use email or phone (+998XXXXXXXXX)');
-    }
-
+  async validateUser(login: string, password: string): Promise<any> {
+    const user = await this.usersService.findByLogin(login);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
-    }
-
-    if (!user.is_active) {
-      throw new UnauthorizedException('Account is deactivated');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -85,48 +27,80 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (!user.is_active) {
+      throw new UnauthorizedException('User account is inactive');
+    }
+
     // Update last login
-    await this.usersService.updateLastLogin(user._id.toString());
+    await this.usersService.updateLastLogin((user as UserDocument)._id.toString());
 
-    // Generate tokens
-    const token = this.generateToken(user._id.toString());
-    const refreshToken = this.generateRefreshToken(user._id.toString());
+    const { password: _, ...result } = (user as UserDocument).toObject();
+    return result;
+  }
 
-    // Save refresh token
-    await this.usersService.updateRefreshToken(user._id.toString(), refreshToken);
+  async login(loginDto: LoginDto) {
+    const user = await this.validateUser(loginDto.login, loginDto.password);
+    const payload = { email: user.email, sub: user._id, role: user.role };
+
+    const accessToken = this.jwtService.sign(payload);
+
+    const refreshTokenExpiresIn = this.configService.get<string>('REFRESH_TOKEN_EXPIRES_IN') || '30d';
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('REFRESH_TOKEN_SECRET') || 'your-refresh-secret',
+      expiresIn: refreshTokenExpiresIn,
+    } as any);
 
     return {
-      user: this.usersService.sanitizeUser(user),
-      token,
+      token: accessToken,
       refresh_token: refreshToken,
+      user: {
+        _id: user._id,
+        full_name: user.full_name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        avatar_url: user.avatar_url,
+        is_active: user.is_active,
+      },
     };
+  }
+
+  async register(registerDto: RegisterDto) {
+    return this.usersService.create(registerDto);
+  }
+
+  async registerStudent(registerStudentDto: RegisterStudentDto) {
+    const user = await this.usersService.create({
+      ...registerStudentDto,
+      role: 'student' as any,
+    });
+    const { password: _, ...result } = (user as UserDocument).toObject();
+    return result;
   }
 
   async refreshToken(refreshToken: string) {
     try {
       const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET') || 'your-refresh-secret',
       });
 
-      const user = await this.usersService.findById(payload.sub);
+      const user = await this.usersService.findOne(payload.sub);
       if (!user || !user.is_active) {
-        throw new UnauthorizedException('Invalid refresh token');
+        throw new UnauthorizedException();
       }
 
-      // Check if refresh token matches
-      if (user.refresh_token !== refreshToken) {
-        throw new UnauthorizedException('Invalid refresh token');
-      }
+      const newPayload = { email: user.email, sub: (user as UserDocument)._id, role: user.role };
 
-      // Generate new tokens
-      const newToken = this.generateToken(user._id.toString());
-      const newRefreshToken = this.generateRefreshToken(user._id.toString());
+      const accessToken = this.jwtService.sign(newPayload);
 
-      // Update refresh token
-      await this.usersService.updateRefreshToken(user._id.toString(), newRefreshToken);
+      const refreshTokenExpiresIn = this.configService.get<string>('REFRESH_TOKEN_EXPIRES_IN') || '30d';
+      const newRefreshToken = this.jwtService.sign(newPayload, {
+        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET') || 'your-refresh-secret',
+        expiresIn: refreshTokenExpiresIn,
+      } as any);
 
       return {
-        token: newToken,
+        token: accessToken,
         refresh_token: newRefreshToken,
       };
     } catch (error) {
@@ -134,34 +108,21 @@ export class AuthService {
     }
   }
 
-  async validateUser(userId: string) {
-    const user = await this.usersService.findById(userId);
-    if (!user || !user.is_active) {
-      throw new UnauthorizedException();
-    }
-    return this.usersService.sanitizeUser(user);
-  }
-
-  async logout(userId: string): Promise<void> {
-    // Clear refresh token
-    await this.usersService.updateRefreshToken(userId, null);
-  }
-
-  private generateToken(userId: string): string {
-    const payload = { sub: userId };
-    const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN', '24h');
-    return this.jwtService.sign(payload, {
-      expiresIn: expiresIn,
-    } as any);
-  }
-
-  private generateRefreshToken(userId: string): string {
-    const payload = { sub: userId };
-    const expiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d');
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: expiresIn,
-    } as any);
+  async getMe(userId: string) {
+    const user = await this.usersService.findOne(userId);
+    const userDoc = user as UserDocument;
+    return {
+      _id: userDoc._id,
+      full_name: userDoc.full_name,
+      email: userDoc.email,
+      phone: userDoc.phone,
+      role: userDoc.role,
+      avatar_url: userDoc.avatar_url,
+      is_active: userDoc.is_active,
+      createdAt: userDoc.createdAt,
+      updatedAt: userDoc.updatedAt,
+      last_login: userDoc.last_login,
+    };
   }
 }
 

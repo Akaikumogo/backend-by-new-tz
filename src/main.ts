@@ -1,50 +1,21 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import helmet from 'helmet';
-import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
+import { Request, Response } from 'express';
+import { NoCacheInterceptor } from './common/interceptors/no-cache.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Static files
+  // Serve static files from uploads directory
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
   });
 
-  // Security
-  app.use(helmet());
-  
-  // CORS configuration
-  const allowedOrigins = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',')
-    : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'];
-  
-  app.enableCors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      
-      if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    exposedHeaders: ['Authorization'],
-  });
-
-  // Global prefix
-  app.setGlobalPrefix('api');
-
-  // Global pipes
+  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -53,26 +24,49 @@ async function bootstrap() {
     }),
   );
 
-  // Global filters
-  app.useGlobalFilters(new HttpExceptionFilter());
+  // Global interceptor to disable HTTP cache (prevent 304 responses)
+  // Frontend (RTK Query) will handle caching internally
+  app.useGlobalInterceptors(new NoCacheInterceptor());
 
-  // Global interceptors
-  app.useGlobalInterceptors(new TransformResponseInterceptor());
+  // CORS configuration
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
 
-  // Swagger documentation
+  // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('Young Adults Study Center API')
-    .setDescription('Backend API for Young Adults Study Center')
+    .setTitle('Young Adults API')
+    .setDescription('Young Adults Backend API Documentation')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
     .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.PORT || 5000;
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
+  // Export Swagger JSON endpoint
+  app.getHttpAdapter().get('/api-json', (req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(document);
+  });
+
+  const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`🚀 Application is running on: http://localhost:${port}/api`);
-  console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
+
+  console.log(`Application is running on: http://localhost:${port}`);
+  console.log(`Swagger documentation: http://localhost:${port}/api`);
+  console.log(`Swagger JSON: http://localhost:${port}/api-json`);
 }
 
 bootstrap();

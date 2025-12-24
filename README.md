@@ -1,94 +1,68 @@
-# Young Adults Study Center - Backend API
+# Young Adults Backend
 
-Backend API for Young Adults Study Center built with NestJS and MongoDB.
+NestJS backend with MongoDB for Young Adults educational center.
 
-## Features
+## Setup
 
-- ✅ Authentication (JWT)
-- ✅ Role-based access control (RBAC)
-- ✅ Staff management
-- ✅ Branches management
-- ✅ Courses management
-- ✅ Statistics
-- ✅ Countries (Consulting)
-- ✅ Applications management
-- ✅ About & Contact info
-- ✅ File upload
-- ✅ Swagger documentation
-- ✅ Rate limiting
-- ✅ Input validation
-
-## Tech Stack
-
-- **Framework**: NestJS
-- **Database**: MongoDB (Mongoose)
-- **Authentication**: JWT
-- **Validation**: class-validator, class-transformer
-- **Documentation**: Swagger/OpenAPI
-
-## Installation
-
+1. Install dependencies:
 ```bash
-# Install dependencies
 npm install
-
-# Copy environment file
-cp .env.example .env
-
-# Edit .env and add your MongoDB URI
-# MONGODB_URI=mongodb://localhost:27017/young-adults
 ```
 
-## Running the app
+2. Create `.env` file:
+```env
+PORT=3000
+MONGODB_URI=mongodb://localhost:27017/young-adults
+JWT_SECRET=your-secret-key-change-this
+JWT_EXPIRES_IN=7d
+REFRESH_TOKEN_SECRET=your-refresh-secret-change-this
+REFRESH_TOKEN_EXPIRES_IN=30d
 
+# Default Admin User (created automatically on first startup if not exists)
+DEFAULT_ADMIN_EMAIL=admin@gmail.com
+DEFAULT_ADMIN_PASSWORD=@dm1n
+DEFAULT_ADMIN_NAME=Admin User
+DEFAULT_ADMIN_PHONE=+998901234567
+```
+
+3. Make sure MongoDB is running
+
+4. Start development server (default admin user will be created automatically if not exists):
 ```bash
-# Development
 npm run start:dev
-
-# Production
-npm run build
-npm run start:prod
 ```
 
-## API Documentation
+Default admin credentials (from `.env`):
+- Email: `admin@gmail.com` (or `DEFAULT_ADMIN_EMAIL`)
+- Password: `@dm1n` (or `DEFAULT_ADMIN_PASSWORD`)
 
-Once the app is running, visit:
-- Swagger UI: http://localhost:5000/api/docs
+5. Start development server:
+```bash
+npm run start:dev
+```
 
-## Environment Variables
-
-See `.env.example` for all required environment variables.
+The API will be available at `http://localhost:3000`
+Swagger documentation: `http://localhost:3000/api`
 
 ## API Endpoints
 
-### Public Endpoints
-- `GET /api/staff` - Get all staff
-- `GET /api/staff/:slug` - Get staff by slug
-- `GET /api/branches` - Get all branches
-- `GET /api/courses` - Get all courses
-- `GET /api/countries` - Get all countries
-- `GET /api/statistics` - Get statistics
-- `GET /api/about` - Get about info
-- `GET /api/contact` - Get contact info
-- `POST /api/applications` - Create application
-- `POST /api/auth/register` - Register
 - `POST /api/auth/login` - Login
+- `POST /api/auth/register` - Register (admin/moderator only)
+- `POST /api/auth/refresh` - Refresh token
+- `GET /api/auth/me` - Get current user
 
-### Protected Endpoints (Admin only)
-- All CRUD operations for Staff, Branches, Courses, Countries
-- Applications management
-- About & Contact updates
-- File upload
+- `GET /api/users` - Get all users (admin/moderator)
+- `POST /api/users` - Create user (admin/moderator)
+- `GET /api/courses` - Get all courses (public)
+- `POST /api/courses` - Create course (moderator/admin)
+- `GET /api/teachers/:id/courses` - Get teacher courses
+- `GET /api/teachers/:id/students` - Get teacher students
+- `POST /api/students/:id/grade` - Grade student (teacher)
 
-## User Roles
+And more... See Swagger docs for full API documentation.
 
-- `super_admin` - Full access
-- `admin` - CRUD operations
-- `moderator` - Applications management
-- `teacher` - Read-only access
-- `user` - Public access
+## Roles
 
-## License
-
-Private
-
+- `admin` - Full access
+- `moderator` - Can manage courses, services, employees, etc.
+- `teacher` - Can view assigned courses and grade students

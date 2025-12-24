@@ -1,69 +1,45 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DatabaseModule } from './database/database.module';
+import databaseConfig from './config/database.config';
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { StaffModule } from './staff/staff.module';
-import { BranchesModule } from './branches/branches.module';
-import { CoursesModule } from './courses/courses.module';
-import { StatisticsModule } from './statistics/statistics.module';
-import { CountriesModule } from './countries/countries.module';
-import { ApplicationsModule } from './applications/applications.module';
+import { UsersModule } from './users/user.module';
+import { CoursesModule } from './courses/course.module';
+import { TeachersModule } from './teachers/teacher.module';
+import { StudentsModule } from './students/student.module';
+import { ServicesModule } from './services/service.module';
+import { EmployeesModule } from './employees/employee.module';
 import { AboutModule } from './about/about.module';
+import { LocationsModule } from './locations/location.module';
 import { ContactModule } from './contact/contact.module';
 import { UploadModule } from './upload/upload.module';
-import { CommonModule } from './common/common.module';
+import { GroupsModule } from './groups/group.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env', '.env.development'],
+      load: [databaseConfig],
+      envFilePath: '.env',
     }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI'),
-      }),
-      inject: [ConfigService],
-    }),
-    ThrottlerModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        throttlers: [
-          {
-            ttl: 900000, // 15 minutes
-            limit: 100, // 100 requests per 15 minutes for public
-          },
-        ],
-      }),
-      inject: [ConfigService],
-    }),
-    CommonModule,
+    DatabaseModule,
     AuthModule,
     UsersModule,
-    StaffModule,
-    BranchesModule,
     CoursesModule,
-    StatisticsModule,
-    CountriesModule,
-    ApplicationsModule,
+    TeachersModule,
+    StudentsModule,
+    GroupsModule,
+    ServicesModule,
+    EmployeesModule,
     AboutModule,
+    LocationsModule,
     ContactModule,
     UploadModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
 

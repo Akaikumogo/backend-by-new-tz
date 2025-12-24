@@ -1,29 +1,37 @@
-import { IsString, IsEmail, IsNotEmpty, MinLength, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+export enum UserRole {
+  ADMIN = 'admin',
+  MODERATOR = 'moderator',
+  TEACHER = 'teacher',
+  STUDENT = 'student',
+}
+
 export class RegisterDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'John Doe' })
   @IsString()
   @IsNotEmpty()
   full_name: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'john@example.com' })
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '+998901234567' })
   @IsString()
   @IsNotEmpty()
-  @Matches(/^\+998\d{9}$/, { message: 'Phone must be in format +998XXXXXXXXX' })
   phone: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'password123' })
   @IsString()
-  @MinLength(8)
-  @Matches(/^(?=.*[A-Z])(?=.*[0-9])/, {
-    message: 'Password must contain at least 1 uppercase letter and 1 number',
-  })
+  @IsNotEmpty()
   password: string;
+
+  @ApiProperty({ example: 'admin', enum: UserRole })
+  @IsEnum(UserRole)
+  @IsNotEmpty()
+  role: UserRole;
 }
 

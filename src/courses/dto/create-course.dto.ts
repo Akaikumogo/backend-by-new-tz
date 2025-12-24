@@ -1,45 +1,54 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum, IsNumber, IsBoolean, IsInt } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CourseCategory } from '../../common/enums/course-category.enum';
+import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsArray, IsNumber, Min, Max } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCourseDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'Frontend dasturlash' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ enum: CourseCategory })
-  @IsEnum(CourseCategory)
-  category: CourseCategory;
-
-  @ApiProperty()
+  @ApiProperty({ example: 'Frontend dasturlash kursi...' })
   @IsString()
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '2 soat' })
   @IsString()
   @IsNotEmpty()
   duration: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  icon_code?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty({ required: false, example: 3, description: 'Haftada necha kun dars' })
   @IsNumber()
-  price?: number;
-
-  @ApiPropertyOptional()
   @IsOptional()
+  @Min(1)
+  @Max(7)
+  daysPerWeek?: number;
+
+  @ApiProperty({ required: false, example: 2, description: 'Bir kunda necha soat dars' })
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  @Max(12)
+  hoursPerDay?: number;
+
+  @ApiProperty({ required: false, example: 'GraduationCap', description: 'Lucide icon nomi' })
+  @IsString()
+  @IsOptional()
+  icon?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  image?: string;
+
+  @ApiProperty({ required: false, type: [String] })
+  @IsArray()
+  @IsOptional()
+  teacherIds?: string[];
+
+  @ApiProperty({ required: false, default: true })
   @IsBoolean()
-  is_active?: boolean;
-
-  @ApiPropertyOptional()
   @IsOptional()
-  @IsInt()
-  order_index?: number;
+  is_active?: boolean;
 }
 

@@ -1,45 +1,25 @@
-import { IsString, IsNotEmpty, IsOptional, IsInt } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, IsArray, IsBoolean } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateAboutDto {
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty({ example: 'About Us' })
   @IsString()
-  title?: string;
+  @IsNotEmpty()
+  title: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty({ example: 'Content text...' })
   @IsString()
-  description?: string;
+  @IsNotEmpty()
+  content: string;
 
-  @ApiPropertyOptional()
+  @ApiProperty({ example: ['https://example.com/image1.jpg'], required: false })
+  @IsArray()
   @IsOptional()
-  @IsString()
-  founder_name?: string;
+  images?: string[];
 
-  @ApiPropertyOptional()
+  @ApiProperty({ required: false, default: true })
+  @IsBoolean()
   @IsOptional()
-  @IsString()
-  founder_title?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsInt()
-  founding_year?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  content_uz?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  content_en?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  content_ru?: string;
+  is_active?: boolean;
 }
 

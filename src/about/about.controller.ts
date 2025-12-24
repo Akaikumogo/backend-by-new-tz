@@ -1,36 +1,46 @@
 import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { AboutService } from './about.service';
 import { UpdateAboutDto } from './dto/update-about.dto';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Public } from '../common/decorators/public.decorator';
-import { Role } from '../common/enums/role.enum';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
-@ApiTags('About')
+@ApiTags('about')
 @Controller('about')
 export class AboutController {
   constructor(private readonly aboutService: AboutService) {}
 
-  @Public()
   @Get()
-  @ApiOperation({ summary: 'Get about info (Public)' })
-  async findOne() {
+  @ApiOperation({ summary: 'Get about content (public)' })
+  @ApiResponse({ status: 200, description: 'About content retrieved successfully' })
+  findOne() {
     return this.aboutService.findOne();
+  }
+
+  @Get('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('moderator', 'admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get about content for admin (moderator/admin)' })
+  @ApiResponse({ status: 200, description: 'About content retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  findOneAdmin() {
+    return this.aboutService.findOneAdmin();
   }
 
   @Patch()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Roles('moderator', 'admin')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update about info (Admin only)' })
-  async update(@Body() updateAboutDto: UpdateAboutDto) {
-    return this.aboutService.update(updateAboutDto);
+  @ApiOperation({ summary: 'Update about content (moderator/admin)' })
+  @ApiBody({ type: UpdateAboutDto })
+  @ApiResponse({ status: 200, description: 'About content updated successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  update(@Body() updateAboutDto: UpdateAboutDto) {
+    return this.aboutService.createOrUpdate(updateAboutDto);
   }
 }
 

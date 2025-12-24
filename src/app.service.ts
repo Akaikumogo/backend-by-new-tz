@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-  getHello() {
+  getHealth(): object {
     return {
-      success: true,
-      message: 'Young Adults Study Center API',
-      version: '1.0.0',
+      status: 'ok',
+      message: 'Young Adults Backend API is running',
+      timestamp: new Date().toISOString(),
     };
   }
 }

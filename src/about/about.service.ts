@@ -6,25 +6,27 @@ import { UpdateAboutDto } from './dto/update-about.dto';
 
 @Injectable()
 export class AboutService {
-  constructor(
-    @InjectModel(About.name) private aboutModel: Model<AboutDocument>,
-  ) {}
+  constructor(@InjectModel(About.name) private aboutModel: Model<AboutDocument>) {}
 
-  async findOne(): Promise<AboutDocument> {
-    const about = await this.aboutModel.findOne().exec();
-    if (!about) {
-      throw new NotFoundException('About info not found');
-    }
-    return about;
+  async findOne(): Promise<About | null> {
+    return this.aboutModel.findOne({ is_active: true }).exec();
   }
 
-  async update(updateAboutDto: UpdateAboutDto): Promise<AboutDocument> {
-    const about = await this.aboutModel.findOneAndUpdate(
-      {},
-      updateAboutDto,
-      { new: true, upsert: true },
-    );
-    return about;
+  async findOneAdmin(): Promise<About | null> {
+    return this.aboutModel.findOne().exec();
+  }
+
+  async createOrUpdate(updateAboutDto: UpdateAboutDto): Promise<About> {
+    const existing = await this.aboutModel.findOne().exec();
+    
+    if (existing) {
+      return this.aboutModel
+        .findByIdAndUpdate(existing._id, updateAboutDto, { new: true })
+        .exec();
+    } else {
+      const about = new this.aboutModel(updateAboutDto);
+      return about.save();
+    }
   }
 }
 

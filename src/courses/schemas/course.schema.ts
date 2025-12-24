@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import { CourseCategory } from '../../common/enums/course-category.enum';
+import { Document, Types } from 'mongoose';
 
 export type CourseDocument = Course & Document;
 
@@ -9,26 +8,29 @@ export class Course {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ type: String, enum: CourseCategory, required: true })
-  category: CourseCategory;
-
   @Prop({ required: true })
   description: string;
 
   @Prop({ required: true })
-  duration: string;
+  duration: string; // "2 soat", "6 oy"
 
-  @Prop({ default: null })
-  icon_code: string;
+  @Prop({ type: Number, required: false })
+  daysPerWeek?: number; // Haftada necha kun dars
 
-  @Prop({ default: null })
-  price: number;
+  @Prop({ type: Number, required: false })
+  hoursPerDay?: number; // Bir kunda necha soat dars
+
+  @Prop()
+  icon?: string; // Lucide icon nomi (masalan, "GraduationCap")
+
+  @Prop()
+  image?: string; // icon yoki image URL
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Teacher' }], default: [] })
+  teachers: Types.ObjectId[];
 
   @Prop({ default: true })
   is_active: boolean;
-
-  @Prop({ default: 0 })
-  order_index: number;
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
