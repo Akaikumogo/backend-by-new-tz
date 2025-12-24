@@ -24,7 +24,24 @@ export class ContactController {
   @Post()
   @ApiOperation({ summary: 'Submit contact form (public)' })
   @ApiBody({ type: CreateContactDto })
-  @ApiResponse({ status: 201, description: 'Contact form submitted successfully' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Contact form submitted successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        name: { type: 'string' },
+        email: { type: 'string' },
+        phone: { type: 'string', nullable: true },
+        message: { type: 'string' },
+        status: { type: 'string', enum: ['pending', 'read', 'replied'], default: 'pending' },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   create(@Body() createContactDto: CreateContactDto) {
     return this.contactService.create(createContactDto);
   }
@@ -34,7 +51,26 @@ export class ContactController {
   @Roles('moderator', 'admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all contact submissions (moderator/admin)' })
-  @ApiResponse({ status: 200, description: 'List of contact submissions retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of contact submissions retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          name: { type: 'string' },
+          email: { type: 'string' },
+          phone: { type: 'string', nullable: true },
+          message: { type: 'string' },
+          status: { type: 'string', enum: ['pending', 'read', 'replied'] },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   findAll() {
@@ -47,7 +83,23 @@ export class ContactController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get contact by ID (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Contact ID' })
-  @ApiResponse({ status: 200, description: 'Contact retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contact retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        name: { type: 'string' },
+        email: { type: 'string' },
+        phone: { type: 'string', nullable: true },
+        message: { type: 'string' },
+        status: { type: 'string', enum: ['pending', 'read', 'replied'] },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Contact not found' })
@@ -62,7 +114,23 @@ export class ContactController {
   @ApiOperation({ summary: 'Update contact status (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Contact ID' })
   @ApiBody({ type: UpdateContactDto })
-  @ApiResponse({ status: 200, description: 'Contact updated successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contact updated successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        name: { type: 'string' },
+        email: { type: 'string' },
+        phone: { type: 'string', nullable: true },
+        message: { type: 'string' },
+        status: { type: 'string', enum: ['pending', 'read', 'replied'] },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Contact not found' })
@@ -76,7 +144,17 @@ export class ContactController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete contact (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Contact ID' })
-  @ApiResponse({ status: 200, description: 'Contact deleted successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contact deleted successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Contact deleted successfully' },
+        deleted: { type: 'boolean', example: true }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Contact not found' })

@@ -23,7 +23,25 @@ export class ServicesController {
 
   @Get()
   @ApiOperation({ summary: 'Get all active services (public)' })
-  @ApiResponse({ status: 200, description: 'List of active services retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of active services retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          title: { type: 'string' },
+          description: { type: 'string' },
+          icon: { type: 'string', nullable: true },
+          is_active: { type: 'boolean' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
   findAll() {
     return this.servicesService.findAll();
   }
@@ -33,7 +51,25 @@ export class ServicesController {
   @Roles('moderator', 'admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all services including inactive (moderator/admin)' })
-  @ApiResponse({ status: 200, description: 'List of all services retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of all services retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          title: { type: 'string' },
+          description: { type: 'string' },
+          icon: { type: 'string', nullable: true },
+          is_active: { type: 'boolean' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   findAllAdmin() {
@@ -43,7 +79,22 @@ export class ServicesController {
   @Get(':id')
   @ApiOperation({ summary: 'Get service by ID (public)' })
   @ApiParam({ name: 'id', description: 'Service ID' })
-  @ApiResponse({ status: 200, description: 'Service retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Service retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        title: { type: 'string' },
+        description: { type: 'string' },
+        icon: { type: 'string', nullable: true },
+        is_active: { type: 'boolean' },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
   @ApiResponse({ status: 404, description: 'Service not found' })
   findOne(@Param('id') id: string) {
     return this.servicesService.findOne(id);
@@ -55,7 +106,23 @@ export class ServicesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create service (moderator/admin)' })
   @ApiBody({ type: CreateServiceDto })
-  @ApiResponse({ status: 201, description: 'Service created successfully' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Service created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        title: { type: 'string' },
+        description: { type: 'string' },
+        icon: { type: 'string', nullable: true },
+        is_active: { type: 'boolean', default: true },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   create(@Body() createServiceDto: CreateServiceDto) {
@@ -69,7 +136,22 @@ export class ServicesController {
   @ApiOperation({ summary: 'Update service (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Service ID' })
   @ApiBody({ type: UpdateServiceDto })
-  @ApiResponse({ status: 200, description: 'Service updated successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Service updated successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        title: { type: 'string' },
+        description: { type: 'string' },
+        icon: { type: 'string', nullable: true },
+        is_active: { type: 'boolean' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Service not found' })
@@ -83,7 +165,17 @@ export class ServicesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete service (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Service ID' })
-  @ApiResponse({ status: 200, description: 'Service deleted successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Service deleted successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Service deleted successfully' },
+        deleted: { type: 'boolean', example: true }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Service not found' })

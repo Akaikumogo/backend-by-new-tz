@@ -23,7 +23,29 @@ export class EmployeesController {
 
   @Get()
   @ApiOperation({ summary: 'Get all active employees (public)' })
-  @ApiResponse({ status: 200, description: 'List of active employees retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of active employees retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          name: { type: 'string' },
+          role: { type: 'string' },
+          birth: { type: 'string' },
+          description1: { type: 'string' },
+          image: { type: 'string' },
+          slug: { type: 'string' },
+          order: { type: 'number' },
+          is_active: { type: 'boolean' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
   findAll() {
     return this.employeesService.findAll();
   }
@@ -33,7 +55,29 @@ export class EmployeesController {
   @Roles('moderator', 'admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all employees including inactive (moderator/admin)' })
-  @ApiResponse({ status: 200, description: 'List of all employees retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of all employees retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          name: { type: 'string' },
+          role: { type: 'string' },
+          birth: { type: 'string' },
+          description1: { type: 'string' },
+          image: { type: 'string' },
+          slug: { type: 'string' },
+          order: { type: 'number' },
+          is_active: { type: 'boolean' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   findAllAdmin() {
@@ -43,7 +87,26 @@ export class EmployeesController {
   @Get(':id')
   @ApiOperation({ summary: 'Get employee by ID (public)' })
   @ApiParam({ name: 'id', description: 'Employee ID' })
-  @ApiResponse({ status: 200, description: 'Employee retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Employee retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        name: { type: 'string' },
+        role: { type: 'string' },
+        birth: { type: 'string' },
+        description1: { type: 'string' },
+        image: { type: 'string' },
+        slug: { type: 'string' },
+        order: { type: 'number' },
+        is_active: { type: 'boolean' },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
   @ApiResponse({ status: 404, description: 'Employee not found' })
   findOne(@Param('id') id: string) {
     return this.employeesService.findOne(id);
@@ -55,7 +118,27 @@ export class EmployeesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create employee (moderator/admin)' })
   @ApiBody({ type: CreateEmployeeDto })
-  @ApiResponse({ status: 201, description: 'Employee created successfully' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Employee created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        name: { type: 'string' },
+        role: { type: 'string' },
+        birth: { type: 'string' },
+        description1: { type: 'string' },
+        image: { type: 'string' },
+        slug: { type: 'string' },
+        order: { type: 'number' },
+        is_active: { type: 'boolean', default: true },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   create(@Body() createEmployeeDto: CreateEmployeeDto) {
@@ -69,7 +152,26 @@ export class EmployeesController {
   @ApiOperation({ summary: 'Update employee (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Employee ID' })
   @ApiBody({ type: UpdateEmployeeDto })
-  @ApiResponse({ status: 200, description: 'Employee updated successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Employee updated successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        name: { type: 'string' },
+        role: { type: 'string' },
+        birth: { type: 'string' },
+        description1: { type: 'string' },
+        image: { type: 'string' },
+        slug: { type: 'string' },
+        order: { type: 'number' },
+        is_active: { type: 'boolean' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Employee not found' })
@@ -83,7 +185,17 @@ export class EmployeesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete employee (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Employee ID' })
-  @ApiResponse({ status: 200, description: 'Employee deleted successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Employee deleted successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Employee deleted successfully' },
+        deleted: { type: 'boolean', example: true }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Employee not found' })

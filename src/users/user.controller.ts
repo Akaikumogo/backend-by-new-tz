@@ -27,7 +27,25 @@ export class UsersController {
   @Roles('admin', 'moderator')
   @ApiOperation({ summary: 'Create a new user' })
   @ApiBody({ type: CreateUserDto })
-  @ApiResponse({ status: 201, description: 'User created successfully' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'User created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        full_name: { type: 'string' },
+        email: { type: 'string' },
+        phone: { type: 'string' },
+        role: { type: 'string', enum: ['admin', 'moderator', 'teacher'] },
+        avatar_url: { type: 'string', nullable: true },
+        is_active: { type: 'boolean', default: true },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Email or phone already exists' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   create(@Body() createUserDto: CreateUserDto) {
@@ -37,7 +55,27 @@ export class UsersController {
   @Get()
   @Roles('admin', 'moderator')
   @ApiOperation({ summary: 'Get all users' })
-  @ApiResponse({ status: 200, description: 'List of users retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of users retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          full_name: { type: 'string' },
+          email: { type: 'string' },
+          phone: { type: 'string' },
+          role: { type: 'string', enum: ['admin', 'moderator', 'teacher'] },
+          avatar_url: { type: 'string', nullable: true },
+          is_active: { type: 'boolean' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   findAll() {
@@ -48,7 +86,25 @@ export class UsersController {
   @Roles('admin', 'moderator')
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiParam({ name: 'id', description: 'User ID' })
-  @ApiResponse({ status: 200, description: 'User retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'User retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        full_name: { type: 'string' },
+        email: { type: 'string' },
+        phone: { type: 'string' },
+        role: { type: 'string', enum: ['admin', 'moderator', 'teacher'] },
+        avatar_url: { type: 'string', nullable: true },
+        is_active: { type: 'boolean' },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' },
+        last_login: { type: 'string', format: 'date-time', nullable: true }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -61,7 +117,24 @@ export class UsersController {
   @ApiOperation({ summary: 'Update user' })
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiBody({ type: UpdateUserDto })
-  @ApiResponse({ status: 200, description: 'User updated successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'User updated successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        full_name: { type: 'string' },
+        email: { type: 'string' },
+        phone: { type: 'string' },
+        role: { type: 'string', enum: ['admin', 'moderator', 'teacher'] },
+        avatar_url: { type: 'string', nullable: true },
+        is_active: { type: 'boolean' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -73,7 +146,17 @@ export class UsersController {
   @Roles('admin')
   @ApiOperation({ summary: 'Delete user' })
   @ApiParam({ name: 'id', description: 'User ID' })
-  @ApiResponse({ status: 200, description: 'User deleted successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'User deleted successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'User deleted successfully' },
+        deleted: { type: 'boolean', example: true }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Only admin can delete users' })
   @ApiResponse({ status: 404, description: 'User not found' })

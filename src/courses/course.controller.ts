@@ -25,7 +25,28 @@ export class CoursesController {
 
   @Get()
   @ApiOperation({ summary: 'Get all courses (public)' })
-  @ApiResponse({ status: 200, description: 'List of courses retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of courses retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          title: { type: 'string' },
+          description: { type: 'string' },
+          duration: { type: 'string' },
+          price: { type: 'number' },
+          image_url: { type: 'string', nullable: true },
+          teachers: { type: 'array', items: { type: 'string' } },
+          is_active: { type: 'boolean' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
   findAll() {
     return this.coursesService.findAll();
   }
@@ -33,7 +54,25 @@ export class CoursesController {
   @Get(':id')
   @ApiOperation({ summary: 'Get course by ID (public)' })
   @ApiParam({ name: 'id', description: 'Course ID' })
-  @ApiResponse({ status: 200, description: 'Course retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Course retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        title: { type: 'string' },
+        description: { type: 'string' },
+        duration: { type: 'string' },
+        price: { type: 'number' },
+        image_url: { type: 'string', nullable: true },
+        teachers: { type: 'array', items: { type: 'string' } },
+        is_active: { type: 'boolean' },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
   @ApiResponse({ status: 404, description: 'Course not found' })
   findOne(@Param('id') id: string) {
     return this.coursesService.findOne(id);
@@ -45,7 +84,46 @@ export class CoursesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get course details with groups and unassigned students' })
   @ApiParam({ name: 'id', description: 'Course ID' })
-  @ApiResponse({ status: 200, description: 'Course details retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Course details retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        course: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            title: { type: 'string' },
+            description: { type: 'string' }
+          }
+        },
+        groups: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              _id: { type: 'string' },
+              name: { type: 'string' },
+              students: { type: 'array', items: { type: 'string' } }
+            }
+          }
+        },
+        unassignedStudents: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              _id: { type: 'string' },
+              full_name: { type: 'string' }
+            }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Course not found' })
   findOneWithDetails(@Param('id') id: string) {
     return this.coursesService.findOneWithDetails(id);
@@ -74,7 +152,26 @@ export class CoursesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create course (moderator/admin)' })
   @ApiBody({ type: CreateCourseDto })
-  @ApiResponse({ status: 201, description: 'Course created successfully' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Course created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        title: { type: 'string' },
+        description: { type: 'string' },
+        duration: { type: 'string' },
+        price: { type: 'number' },
+        image_url: { type: 'string', nullable: true },
+        teachers: { type: 'array', items: { type: 'string' } },
+        is_active: { type: 'boolean', default: true },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   create(@Body() createCourseDto: CreateCourseDto) {
@@ -88,7 +185,25 @@ export class CoursesController {
   @ApiOperation({ summary: 'Update course (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Course ID' })
   @ApiBody({ type: UpdateCourseDto })
-  @ApiResponse({ status: 200, description: 'Course updated successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Course updated successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        title: { type: 'string' },
+        description: { type: 'string' },
+        duration: { type: 'string' },
+        price: { type: 'number' },
+        image_url: { type: 'string', nullable: true },
+        teachers: { type: 'array', items: { type: 'string' } },
+        is_active: { type: 'boolean' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Course not found' })
@@ -102,7 +217,17 @@ export class CoursesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete course (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Course ID' })
-  @ApiResponse({ status: 200, description: 'Course deleted successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Course deleted successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Course deleted successfully' },
+        deleted: { type: 'boolean', example: true }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Course not found' })
@@ -117,7 +242,20 @@ export class CoursesController {
   @ApiOperation({ summary: 'Assign teachers to course (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Course ID' })
   @ApiBody({ type: AssignTeacherDto })
-  @ApiResponse({ status: 200, description: 'Teachers assigned successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Teachers assigned successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        title: { type: 'string' },
+        teachers: { type: 'array', items: { type: 'string' } },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid teacher IDs' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Course not found' })

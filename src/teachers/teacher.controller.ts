@@ -16,7 +16,27 @@ export class TeachersController {
   @Roles('admin', 'moderator')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all teachers (admin/moderator)' })
-  @ApiResponse({ status: 200, description: 'List of teachers retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of teachers retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          user: { type: 'string' },
+          specialization: { type: 'string' },
+          experience: { type: 'number' },
+          bio: { type: 'string', nullable: true },
+          courses: { type: 'array', items: { type: 'string' } },
+          is_active: { type: 'boolean' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   findAll() {
@@ -28,7 +48,33 @@ export class TeachersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get teacher by ID' })
   @ApiParam({ name: 'id', description: 'Teacher ID' })
-  @ApiResponse({ status: 200, description: 'Teacher retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Teacher retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        user: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            full_name: { type: 'string' },
+            email: { type: 'string' },
+            phone: { type: 'string' },
+            avatar_url: { type: 'string', nullable: true }
+          }
+        },
+        specialization: { type: 'string' },
+        experience: { type: 'number' },
+        bio: { type: 'string', nullable: true },
+        courses: { type: 'array', items: { type: 'string' } },
+        is_active: { type: 'boolean' },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Teacher not found' })
   findOne(@Param('id') id: string) {
@@ -40,9 +86,28 @@ export class TeachersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get teacher courses' })
   @ApiParam({ name: 'id', description: 'Teacher ID' })
-  @ApiResponse({ status: 200, description: 'List of teacher courses retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of teacher courses retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          title: { type: 'string' },
+          description: { type: 'string' },
+          duration: { type: 'string' },
+          price: { type: 'number' },
+          image_url: { type: 'string', nullable: true },
+          is_active: { type: 'boolean' }
+        }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Cannot access other teachers courses' })
+  @ApiResponse({ status: 404, description: 'Teacher not found' })
   async getCourses(@Param('id') id: string, @CurrentUser() user: any) {
     // Check if teacher is accessing their own courses or admin/moderator
     const teacher = await this.teachersService.findOne(id);
@@ -57,9 +122,30 @@ export class TeachersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get teacher students' })
   @ApiParam({ name: 'id', description: 'Teacher ID' })
-  @ApiResponse({ status: 200, description: 'List of teacher students retrieved successfully' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of teacher students retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          full_name: { type: 'string' },
+          email: { type: 'string' },
+          phone: { type: 'string' },
+          courseId: { type: 'string' },
+          groupId: { type: 'string', nullable: true },
+          status: { type: 'string', enum: ['active', 'completed', 'dropped'] },
+          grades: { type: 'object' },
+          attendance: { type: 'array' }
+        }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Cannot access other teachers students' })
+  @ApiResponse({ status: 404, description: 'Teacher not found' })
   async getStudents(@Param('id') id: string, @CurrentUser() user: any) {
     // Check if teacher is accessing their own students or admin/moderator
     const teacher = await this.teachersService.findOne(id);

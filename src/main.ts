@@ -37,19 +37,60 @@ async function bootstrap() {
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('Young Adults API')
-    .setDescription('Young Adults Backend API Documentation')
-    .setVersion('1.0')
+    .setDescription(`
+      Complete API documentation for Young Adults Educational Center Backend.
+      
+      ## Authentication
+      Most endpoints require JWT authentication. Use the login endpoint to obtain a token, then click the "Authorize" button above and enter your token.
+      
+      ## Roles
+      - **admin**: Full access to all endpoints
+      - **moderator**: Can manage courses, services, employees, locations, groups, and students
+      - **teacher**: Can view assigned courses and grade students
+      - **student**: Can enroll in courses
+      
+      ## Endpoints
+      - **auth**: Authentication and user management
+      - **users**: User CRUD operations (admin/moderator only)
+      - **courses**: Course management
+      - **students**: Student enrollment and management
+      - **groups**: Group management
+      - **teachers**: Teacher information
+      - **services**: Service management
+      - **employees**: Employee management
+      - **locations**: Location management
+      - **about**: About page content
+      - **contact**: Contact form submissions
+      - **upload**: File upload functionality
+    `)
+    .setVersion('1.0.0')
+    .setContact('Young Adults', 'https://youngadults.uz', 'info@youngadults.uz')
+    .addServer('http://localhost:3000', 'Development server')
+    .addServer('https://api.youngadults.uz', 'Production server')
     .addBearerAuth(
       {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
         name: 'JWT',
-        description: 'Enter JWT token',
+        description: 'Enter JWT token obtained from /auth/login endpoint',
         in: 'header',
       },
       'JWT-auth',
     )
+    .addTag('health', 'Health check endpoints')
+    .addTag('auth', 'Authentication endpoints')
+    .addTag('users', 'User management endpoints')
+    .addTag('courses', 'Course management endpoints')
+    .addTag('students', 'Student management endpoints')
+    .addTag('groups', 'Group management endpoints')
+    .addTag('teachers', 'Teacher endpoints')
+    .addTag('services', 'Service management endpoints')
+    .addTag('employees', 'Employee management endpoints')
+    .addTag('locations', 'Location management endpoints')
+    .addTag('about', 'About page endpoints')
+    .addTag('contact', 'Contact form endpoints')
+    .addTag('upload', 'File upload endpoints')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
