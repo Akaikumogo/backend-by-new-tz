@@ -28,6 +28,9 @@ async function bootstrap() {
   // Frontend (RTK Query) will handle caching internally
   app.useGlobalInterceptors(new NoCacheInterceptor());
 
+  // Trust proxy to get correct origin from X-Forwarded-* headers
+  app.set('trust proxy', true);
+
   // CORS configuration
   app.enableCors({
     origin: true,
@@ -90,20 +93,38 @@ async function bootstrap() {
     .addTag('upload', 'File upload endpoints')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const baseDocument = SwaggerModule.createDocument(app, config);
+  
+  // Create dynamic Swagger JSON endpoint that uses current domain
+  app.getHttpAdapter().get('/api-json', (req: Request, res: Response) => {
+    // Get the current origin from the request
+    // Handle proxy headers (X-Forwarded-Proto, X-Forwarded-Host)
+    const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
+    const host = req.get('x-forwarded-host') || req.get('host') || 'localhost:3000';
+    const origin = `${protocol}://${host}`;
+    
+    // Clone document and set servers dynamically
+    const dynamicDocument = {
+      ...baseDocument,
+      servers: [
+        {
+          url: origin,
+          description: 'Current server',
+        },
+      ],
+    };
+    
+    res.setHeader('Content-Type', 'application/json');
+    res.send(dynamicDocument);
+  });
   
   // Configure Swagger to use current domain automatically
-  SwaggerModule.setup('api', app, document, {
+  SwaggerModule.setup('api', app, baseDocument, {
     swaggerOptions: {
       persistAuthorization: true,
+      url: '/api-json',
     },
     customSiteTitle: 'Young Adults API Documentation',
-  });
-
-  // Export Swagger JSON endpoint
-  app.getHttpAdapter().get('/api-json', (req: Request, res: Response) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(document);
   });
 
   const port = process.env.PORT || 3000;
