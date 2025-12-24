@@ -36,7 +36,7 @@ async function bootstrap() {
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('Young Adults API')
+    .setTitle('Young Adults Educational Center Backend')
     .setDescription(`
       Complete API documentation for Young Adults Educational Center Backend.
       
@@ -64,9 +64,6 @@ async function bootstrap() {
       - **upload**: File upload functionality
     `)
     .setVersion('1.0.0')
-    .setContact('Young Adults', 'https://youngadults.uz', 'info@youngadults.uz')
-    .addServer('http://localhost:3000', 'Development server')
-    .addServer('https://api.youngadults.uz', 'Production server')
     .addBearerAuth(
       {
         type: 'http',
@@ -94,7 +91,14 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  
+  // Configure Swagger to use current domain automatically
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+    customSiteTitle: 'Young Adults API Documentation',
+  });
 
   // Export Swagger JSON endpoint
   app.getHttpAdapter().get('/api-json', (req: Request, res: Response) => {
