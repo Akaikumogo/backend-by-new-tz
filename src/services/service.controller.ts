@@ -49,7 +49,7 @@ export class ServicesController {
   @Get('admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get all services including inactive (moderator/admin)' })
   @ApiResponse({ 
     status: 200, 
@@ -103,7 +103,7 @@ export class ServicesController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create service (moderator/admin)' })
   @ApiBody({ type: CreateServiceDto })
   @ApiResponse({ 
@@ -132,7 +132,7 @@ export class ServicesController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update service (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Service ID' })
   @ApiBody({ type: UpdateServiceDto })
@@ -162,7 +162,7 @@ export class ServicesController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete service (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Service ID' })
   @ApiResponse({ 

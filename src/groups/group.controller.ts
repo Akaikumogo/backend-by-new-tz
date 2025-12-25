@@ -31,7 +31,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 @Controller('groups')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin', 'moderator')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 

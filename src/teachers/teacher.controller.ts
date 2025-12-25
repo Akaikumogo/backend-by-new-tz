@@ -14,7 +14,7 @@ export class TeachersController {
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'moderator')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get all teachers (admin/moderator)' })
   @ApiResponse({ 
     status: 200, 
@@ -45,7 +45,7 @@ export class TeachersController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get teacher by ID' })
   @ApiParam({ name: 'id', description: 'Teacher ID' })
   @ApiResponse({ 
@@ -83,7 +83,7 @@ export class TeachersController {
 
   @Get(':id/courses')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get teacher courses' })
   @ApiParam({ name: 'id', description: 'Teacher ID' })
   @ApiResponse({ 
@@ -119,7 +119,7 @@ export class TeachersController {
 
   @Get(':id/students')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get teacher students' })
   @ApiParam({ name: 'id', description: 'Teacher ID' })
   @ApiResponse({ 

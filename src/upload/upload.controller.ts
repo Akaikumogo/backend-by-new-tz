@@ -22,7 +22,7 @@ import * as fs from 'fs';
 @ApiTags('upload')
 @Controller('upload')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
@@ -81,7 +81,7 @@ export class UploadController {
 
   @Get('file/:filename(*)')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get uploaded file (protected)' })
   @ApiParam({ name: 'filename', description: 'File name' })
   @ApiResponse({ status: 200, description: 'File retrieved successfully' })

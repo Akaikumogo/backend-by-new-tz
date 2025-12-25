@@ -53,7 +53,7 @@ export class EmployeesController {
   @Get('admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get all employees including inactive (moderator/admin)' })
   @ApiResponse({ 
     status: 200, 
@@ -115,7 +115,7 @@ export class EmployeesController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create employee (moderator/admin)' })
   @ApiBody({ type: CreateEmployeeDto })
   @ApiResponse({ 
@@ -148,7 +148,7 @@ export class EmployeesController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update employee (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Employee ID' })
   @ApiBody({ type: UpdateEmployeeDto })
@@ -182,7 +182,7 @@ export class EmployeesController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete employee (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Employee ID' })
   @ApiResponse({ 

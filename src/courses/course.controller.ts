@@ -81,7 +81,7 @@ export class CoursesController {
   @Get(':id/details')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'moderator', 'teacher')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get course details with groups and unassigned students' })
   @ApiParam({ name: 'id', description: 'Course ID' })
   @ApiResponse({ 
@@ -132,7 +132,7 @@ export class CoursesController {
   @Get(':id/teachers')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'moderator', 'teacher')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get teachers assigned to a course' })
   @ApiParam({ name: 'id', description: 'Course ID' })
   @ApiResponse({ 
@@ -149,7 +149,7 @@ export class CoursesController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create course (moderator/admin)' })
   @ApiBody({ type: CreateCourseDto })
   @ApiResponse({ 
@@ -181,7 +181,7 @@ export class CoursesController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update course (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Course ID' })
   @ApiBody({ type: UpdateCourseDto })
@@ -214,7 +214,7 @@ export class CoursesController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete course (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Course ID' })
   @ApiResponse({ 
@@ -238,7 +238,7 @@ export class CoursesController {
   @Post(':id/assign-teacher')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Assign teachers to course (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Course ID' })
   @ApiBody({ type: AssignTeacherDto })

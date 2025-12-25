@@ -49,7 +49,7 @@ export class ContactController {
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get all contact submissions (moderator/admin)' })
   @ApiResponse({ 
     status: 200, 
@@ -80,7 +80,7 @@ export class ContactController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get contact by ID (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Contact ID' })
   @ApiResponse({ 
@@ -110,7 +110,7 @@ export class ContactController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update contact status (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Contact ID' })
   @ApiBody({ type: UpdateContactDto })
@@ -141,7 +141,7 @@ export class ContactController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete contact (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Contact ID' })
   @ApiResponse({ 

@@ -46,7 +46,7 @@ export class AuthController {
 
   @Post('register')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Register new user (admin/moderator only)' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({ 
@@ -126,7 +126,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get current authenticated user information' })
   @ApiResponse({ 
     status: 200, 

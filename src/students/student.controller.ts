@@ -22,7 +22,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 @ApiTags('students')
 @Controller('students')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 

@@ -58,7 +58,7 @@ export class LocationsController {
   @Get('admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get all locations including inactive (moderator/admin)' })
   @ApiResponse({ 
     status: 200, 
@@ -130,7 +130,7 @@ export class LocationsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create location (moderator/admin)' })
   @ApiBody({ type: CreateLocationDto })
   @ApiResponse({ 
@@ -168,7 +168,7 @@ export class LocationsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update location (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Location ID' })
   @ApiBody({ type: UpdateLocationDto })
@@ -207,7 +207,7 @@ export class LocationsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete location (moderator/admin)' })
   @ApiParam({ name: 'id', description: 'Location ID' })
   @ApiResponse({ 

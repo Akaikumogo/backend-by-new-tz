@@ -36,7 +36,7 @@ export class AboutController {
   @Get('admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get about content for admin (moderator/admin)' })
   @ApiResponse({ 
     status: 200, 
@@ -63,7 +63,7 @@ export class AboutController {
   @Patch()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('moderator', 'admin')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update about content (moderator/admin)' })
   @ApiBody({ type: UpdateAboutDto })
   @ApiResponse({ 
