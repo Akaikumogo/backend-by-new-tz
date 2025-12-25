@@ -26,5 +26,10 @@ export class EnrollStudentDto {
   @IsString()
   @IsOptional()
   teacherId?: string;
+
+  @ApiProperty({ example: 'groupId123', required: false })
+  @IsString()
+  @IsOptional()
+  groupId?: string;
 }
 

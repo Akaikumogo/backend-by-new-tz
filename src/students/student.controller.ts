@@ -56,10 +56,13 @@ export class StudentsController {
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   create(@Body() enrollStudentDto: EnrollStudentDto, @CurrentUser() user: any) {
     // If student is enrolling themselves, use their user info
+    // Students cannot assign themselves to groups - only admins/moderators can do that
     if (user.role === 'student') {
       enrollStudentDto.full_name = user.full_name || enrollStudentDto.full_name;
       enrollStudentDto.email = user.email || enrollStudentDto.email;
       enrollStudentDto.phone = user.phone || enrollStudentDto.phone;
+      // Remove groupId if student tries to set it (security measure)
+      delete enrollStudentDto.groupId;
     }
     return this.studentsService.create(enrollStudentDto);
   }

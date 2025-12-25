@@ -1,13 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Student, StudentDocument } from './schemas/student.schema';
+import { Group, GroupDocument } from '../groups/schemas/group.schema';
 import { EnrollStudentDto } from './dto/enroll-student.dto';
 import { GradeStudentDto } from './dto/grade-student.dto';
 
 @Injectable()
 export class StudentsService {
-  constructor(@InjectModel(Student.name) private studentModel: Model<StudentDocument>) {}
+  constructor(
+    @InjectModel(Student.name) private studentModel: Model<StudentDocument>,
+    @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
+  ) {}
 
   async create(enrollStudentDto: EnrollStudentDto): Promise<StudentDocument> {
     const studentData: any = {
@@ -24,9 +28,49 @@ export class StudentsService {
       studentData.teacher = enrollStudentDto.teacherId;
     }
 
-    const student = new this.studentModel(studentData);
+    // Only set group if groupId is provided (admin/moderator can set this)
+    // Students self-enrolling should not have groupId set
+    if (enrollStudentDto.groupId && enrollStudentDto.groupId.trim() !== '') {
+      studentData.group = enrollStudentDto.groupId;
+    }
 
-    return student.save();
+    const student = new this.studentModel(studentData);
+    const savedStudent = await student.save();
+
+    // If groupId is provided, also add student to group's students array
+    if (enrollStudentDto.groupId && enrollStudentDto.groupId.trim() !== '') {
+      try {
+        const group = await this.groupModel.findById(enrollStudentDto.groupId).exec();
+        if (group) {
+          // Check max students limit
+          const currentStudentIds = group.students.map((s: any) => 
+            typeof s === 'object' && s._id ? s._id.toString() : s.toString()
+          );
+          
+          if (group.maxStudents && currentStudentIds.length >= group.maxStudents) {
+            throw new BadRequestException(
+              `Group is full. Maximum ${group.maxStudents} students allowed.`
+            );
+          }
+
+          // Add student to group's students array if not already present
+          const studentIdStr = savedStudent._id.toString();
+          if (!currentStudentIds.includes(studentIdStr)) {
+            group.students.push(savedStudent._id as any);
+            await group.save();
+          }
+        }
+      } catch (error) {
+        // If group update fails, log but don't fail student creation
+        // The student's group field is already set, admin can fix group's students array manually if needed
+        if (error instanceof BadRequestException) {
+          throw error; // Re-throw BadRequestException (group full)
+        }
+        // For other errors, continue - student is created with group field set
+      }
+    }
+
+    return savedStudent;
   }
 
   async findAll(): Promise<StudentDocument[]> {
