@@ -96,38 +96,30 @@ async function bootstrap() {
     .build();
 
   const baseDocument = SwaggerModule.createDocument(app, config);
-  //nima muamo
-  // Create dynamic Swagger JSON endpoint that uses current domain
+
+  // Dynamic Swagger JSON endpoint - uses current domain
   app.getHttpAdapter().get('/api-json', (req: Request, res: Response) => {
-    // Get the current origin from the request
-    // Handle proxy headers (X-Forwarded-Proto, X-Forwarded-Host)
     const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
     const host =
       req.get('x-forwarded-host') || req.get('host') || 'localhost:3000';
     const origin = `${protocol}://${host}`;
 
-    // Clone document and set servers dynamically
     const dynamicDocument = {
       ...baseDocument,
-      servers: [
-        {
-          url: origin,
-          description: 'Current server'
-        }
-      ]
+      servers: [{ url: origin, description: 'Current server' }]
     };
 
     res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache');
     res.send(dynamicDocument);
   });
 
-  // Configure Swagger to use current domain automatically
+  // Minimal Swagger UI setup
   SwaggerModule.setup('api', app, baseDocument, {
     swaggerOptions: {
       persistAuthorization: true,
       url: '/api-json'
-    },
-    customSiteTitle: 'Young Adults API Documentation'
+    }
   });
 
   const port = process.env.PORT || 3000;
@@ -136,6 +128,7 @@ async function bootstrap() {
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(`Swagger documentation: http://localhost:${port}/api`);
   console.log(`Swagger JSON: http://localhost:${port}/api-json`);
+  console.log(`production: https://ya.akaikumogo.uz/api`);
 }
 
 bootstrap();
