@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
 import { CoursesService } from './course.service';
@@ -15,8 +16,10 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 import { AssignTeacherDto } from './dto/assign-teacher.dto';
 import { TeacherResponseDto } from './dto/teacher-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Request } from 'express';
 
 @ApiTags('courses')
 @Controller('courses')
@@ -24,7 +27,8 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all courses (public)' })
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiOperation({ summary: 'Get all courses (filtered by role - public access with optional auth)' })
   @ApiResponse({ 
     status: 200, 
     description: 'List of courses retrieved successfully',
@@ -47,7 +51,15 @@ export class CoursesController {
       }
     }
   })
-  findAll() {
+  findAll(@Req() req: Request) {
+    // Check if user is authenticated (from JWT guard if token is present)
+    const user = (req as any).user;
+    
+    // If user is a teacher, return only their courses
+    if (user && user.role === 'teacher') {
+      return this.coursesService.findByTeacher(user._id.toString());
+    }
+    // Admin, moderator, and unauthenticated users see all courses
     return this.coursesService.findAll();
   }
 

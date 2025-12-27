@@ -12,6 +12,7 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { StudentsService } from './student.service';
 import { EnrollStudentDto } from './dto/enroll-student.dto';
+import { EnrollCourseDto } from './dto/enroll-course.dto';
 import { GradeStudentDto } from './dto/grade-student.dto';
 import { QueryStudentsDto } from './dto/query-students.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -27,8 +28,8 @@ export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
   @Post()
-  @Roles('admin', 'moderator', 'teacher', 'student')
-  @ApiOperation({ summary: 'Enroll a student' })
+  @Roles('admin', 'moderator')
+  @ApiOperation({ summary: 'Enroll a student (admin/moderator only)' })
   @ApiBody({ type: EnrollStudentDto })
   @ApiResponse({ 
     status: 201, 
@@ -54,22 +55,42 @@ export class StudentsController {
   @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
-  create(@Body() enrollStudentDto: EnrollStudentDto, @CurrentUser() user: any) {
-    // If student is enrolling themselves, use their user info
-    // Students cannot assign themselves to groups - only admins/moderators can do that
-    if (user.role === 'student') {
-      enrollStudentDto.full_name = user.full_name || enrollStudentDto.full_name;
-      enrollStudentDto.email = user.email || enrollStudentDto.email;
-      enrollStudentDto.phone = user.phone || enrollStudentDto.phone;
-      // Remove groupId if student tries to set it (security measure)
-      delete enrollStudentDto.groupId;
-    }
+  create(@Body() enrollStudentDto: EnrollStudentDto) {
     return this.studentsService.create(enrollStudentDto);
   }
 
+  @Post('enroll')
+  @Roles('student')
+  @ApiOperation({ summary: 'Enroll yourself in a course (student only - only courseId required)' })
+  @ApiBody({ type: EnrollCourseDto })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Successfully enrolled in course',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        full_name: { type: 'string' },
+        email: { type: 'string' },
+        phone: { type: 'string' },
+        courseId: { type: 'string' },
+        status: { type: 'string', enum: ['active'], default: 'active' },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid course ID' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Only students can use this endpoint' })
+  enrollInCourse(@Body() enrollCourseDto: EnrollCourseDto, @CurrentUser() user: any) {
+    // User info comes from JWT token
+    return this.studentsService.enrollUserInCourse(user, enrollCourseDto.courseId);
+  }
+
   @Get()
-  @Roles('admin', 'moderator')
-  @ApiOperation({ summary: 'Get all students (admin/moderator)' })
+  @Roles('admin', 'moderator', 'teacher')
+  @ApiOperation({ summary: 'Get all students (filtered by role)' })
   @ApiResponse({ 
     status: 200, 
     description: 'List of students retrieved successfully',
@@ -96,7 +117,12 @@ export class StudentsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
-  findAll() {
+  async findAll(@CurrentUser() user: any) {
+    // If user is a teacher, return only students from their courses
+    if (user && user.role === 'teacher') {
+      return this.studentsService.findByTeacherCourses(user._id.toString());
+    }
+    // Admin and moderator see all students
     return this.studentsService.findAll();
   }
 

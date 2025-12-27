@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Student, StudentDocument } from './schemas/student.schema';
 import { Group, GroupDocument } from '../groups/schemas/group.schema';
+import { Course, CourseDocument } from '../courses/schemas/course.schema';
+import { Teacher, TeacherDocument } from '../teachers/schemas/teacher.schema';
 import { EnrollStudentDto } from './dto/enroll-student.dto';
 import { GradeStudentDto } from './dto/grade-student.dto';
 
@@ -11,6 +13,8 @@ export class StudentsService {
   constructor(
     @InjectModel(Student.name) private studentModel: Model<StudentDocument>,
     @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
+    @InjectModel(Course.name) private courseModel: Model<CourseDocument>,
+    @InjectModel(Teacher.name) private teacherModel: Model<TeacherDocument>,
   ) {}
 
   async create(enrollStudentDto: EnrollStudentDto): Promise<StudentDocument> {
@@ -73,6 +77,59 @@ export class StudentsService {
     return savedStudent;
   }
 
+  async enrollUserInCourse(user: any, courseId: string): Promise<StudentDocument> {
+    // Check if course exists
+    const course = await this.courseModel.findById(courseId).exec();
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    // Check if course is active
+    if (!course.is_active) {
+      throw new BadRequestException('This course is not active');
+    }
+
+    // Check if user is already enrolled in this course (check by user ID or email)
+    const existingEnrollment = await this.studentModel
+      .findOne({
+        $or: [
+          { email: user.email },
+          // If we have user ID stored somewhere, check that too
+        ],
+        course: courseId,
+        status: { $in: ['active'] }
+      })
+      .exec();
+
+    if (existingEnrollment) {
+      throw new BadRequestException('You are already enrolled in this course');
+    }
+
+    // Create student enrollment with user info from token
+    const studentData: any = {
+      full_name: user.full_name || 'Unknown',
+      phone: user.phone || '',
+      course: courseId,
+      enrollment_date: new Date(),
+      status: 'active',
+    };
+
+    // Add email if available
+    if (user.email) {
+      studentData.email = user.email;
+    }
+
+    // Try to assign a teacher from the course if available
+    if (course.teachers && course.teachers.length > 0) {
+      // Get the first teacher from the course
+      const teacherId = course.teachers[0];
+      studentData.teacher = teacherId;
+    }
+
+    const student = new this.studentModel(studentData);
+    return student.save();
+  }
+
   async findAll(): Promise<StudentDocument[]> {
     return this.studentModel.find().populate('course').populate('teacher').exec();
   }
@@ -102,6 +159,38 @@ export class StudentsService {
   async findByCourse(courseId: string): Promise<StudentDocument[]> {
     return this.studentModel
       .find({ course: courseId })
+      .populate('course')
+      .populate('teacher')
+      .populate('group')
+      .exec();
+  }
+
+  async findByTeacherCourses(teacherUserId: string): Promise<StudentDocument[]> {
+    // Find teacher entity by user ID
+    const teacher = await this.teacherModel.findOne({ user: teacherUserId }).exec();
+    
+    if (!teacher) {
+      // If no teacher entity exists, return empty array
+      return [];
+    }
+    
+    // Find all courses where this teacher is assigned
+    // Course.teachers contains Teacher ObjectIds
+    const courses = await this.courseModel
+      .find({ teachers: teacher._id })
+      .select('_id')
+      .lean()
+      .exec();
+    
+    const courseIds = courses.map((c: any) => c._id);
+    
+    if (courseIds.length === 0) {
+      return [];
+    }
+    
+    // Find all students whose course is in the teacher's courses
+    return this.studentModel
+      .find({ course: { $in: courseIds } })
       .populate('course')
       .populate('teacher')
       .populate('group')

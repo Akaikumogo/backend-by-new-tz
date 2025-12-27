@@ -179,8 +179,21 @@ export class CoursesService {
     return course.save();
   }
 
-  async findByTeacher(teacherId: string): Promise<Course[]> {
-    return this.courseModel.find({ teachers: teacherId }).populate('teachers').exec();
+  async findByTeacher(teacherUserId: string): Promise<Course[]> {
+    // Find the Teacher entity by user ID
+    const teacher = await this.teacherModel.findOne({ user: teacherUserId }).exec();
+    
+    if (!teacher) {
+      // If no teacher entity exists, return empty array
+      return [];
+    }
+    
+    // Find courses where the teacher's _id is in the teachers array
+    // Course.teachers contains Teacher ObjectIds
+    return this.courseModel
+      .find({ teachers: teacher._id })
+      .populate('teachers')
+      .exec();
   }
 
   async findOneWithDetails(id: string): Promise<any> {
