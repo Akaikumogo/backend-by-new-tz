@@ -6,13 +6,31 @@ export type CourseDocument = Course & Document;
 @Schema({ timestamps: true })
 export class Course {
   @Prop({ required: true })
-  name: string;
+  name_uz: string;
+
+  @Prop({ required: true, default: '' })
+  name_en: string;
+
+  @Prop({ required: true, default: '' })
+  name_ru: string;
 
   @Prop({ required: true })
-  description: string;
+  description_uz: string;
+
+  @Prop({ required: true, default: '' })
+  description_en: string;
+
+  @Prop({ required: true, default: '' })
+  description_ru: string;
 
   @Prop({ required: true })
-  duration: string; // "2 soat", "6 oy"
+  duration_uz: string; // "2 soat", "6 oy"
+
+  @Prop({ required: true, default: '' })
+  duration_en: string;
+
+  @Prop({ required: true, default: '' })
+  duration_ru: string;
 
   @Prop({ type: Number, required: false })
   daysPerWeek?: number; // Haftada necha kun dars

@@ -6,13 +6,25 @@ export type ServiceDocument = Service & Document;
 @Schema({ timestamps: true })
 export class Service {
   @Prop({ required: true })
-  name: string; // Country name
+  name_uz: string; // Country name
+
+  @Prop({ required: true, default: '' })
+  name_en: string;
+
+  @Prop({ required: true, default: '' })
+  name_ru: string;
 
   @Prop({ required: true })
   flag: string; // Flag image URL
 
   @Prop({ required: true })
-  description: string;
+  description_uz: string;
+
+  @Prop({ required: true, default: '' })
+  description_en: string;
+
+  @Prop({ required: true, default: '' })
+  description_ru: string;
 
   @Prop({ required: true })
   minIELTS: string;

@@ -2,10 +2,20 @@ import { IsString, IsNotEmpty, IsOptional, IsNumber, IsBoolean } from 'class-val
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateServiceDto {
-  @ApiProperty({ example: 'United Kingdom' })
+  @ApiProperty({ example: 'Birlashgan Qirollik' })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name_uz: string;
+
+  @ApiProperty({ example: 'United Kingdom', required: false })
+  @IsString()
+  @IsOptional()
+  name_en?: string;
+
+  @ApiProperty({ example: 'Соединенное Королевство', required: false })
+  @IsString()
+  @IsOptional()
+  name_ru?: string;
 
   @ApiProperty({ example: 'https://flagcdn.com/gb.svg' })
   @IsString()
@@ -15,7 +25,17 @@ export class CreateServiceDto {
   @ApiProperty({ example: 'UK universitetlari...' })
   @IsString()
   @IsNotEmpty()
-  description: string;
+  description_uz: string;
+
+  @ApiProperty({ example: 'UK universities...', required: false })
+  @IsString()
+  @IsOptional()
+  description_en?: string;
+
+  @ApiProperty({ example: 'Университеты Великобритании...', required: false })
+  @IsString()
+  @IsOptional()
+  description_ru?: string;
 
   @ApiProperty({ example: '6.5' })
   @IsString()

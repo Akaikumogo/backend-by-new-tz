@@ -2,15 +2,35 @@ import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsObject, IsNumber } from 
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateLocationDto {
-  @ApiProperty({ example: 'Main Branch' })
+  @ApiProperty({ example: 'Asosiy filial' })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name_uz: string;
+
+  @ApiProperty({ example: 'Main Branch', required: false })
+  @IsString()
+  @IsOptional()
+  name_en?: string;
+
+  @ApiProperty({ example: 'Главный филиал', required: false })
+  @IsString()
+  @IsOptional()
+  name_ru?: string;
 
   @ApiProperty({ example: '123 Main St, Tashkent' })
   @IsString()
   @IsNotEmpty()
-  address: string;
+  address_uz: string;
+
+  @ApiProperty({ example: '123 Main St, Tashkent', required: false })
+  @IsString()
+  @IsOptional()
+  address_en?: string;
+
+  @ApiProperty({ example: '123 Main St, Ташкент', required: false })
+  @IsString()
+  @IsOptional()
+  address_ru?: string;
 
   @ApiProperty({ example: '+998901234567', required: false })
   @IsString()

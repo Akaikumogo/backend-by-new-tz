@@ -6,10 +6,22 @@ export type LocationDocument = Location & Document;
 @Schema({ timestamps: true })
 export class Location {
   @Prop({ required: true })
-  name: string;
+  name_uz: string;
+
+  @Prop({ required: true, default: '' })
+  name_en: string;
+
+  @Prop({ required: true, default: '' })
+  name_ru: string;
 
   @Prop({ required: true })
-  address: string;
+  address_uz: string;
+
+  @Prop({ required: true, default: '' })
+  address_en: string;
+
+  @Prop({ required: true, default: '' })
+  address_ru: string;
 
   @Prop()
   phone?: string;

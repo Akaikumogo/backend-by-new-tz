@@ -5,17 +5,47 @@ export class CreateCourseDto {
   @ApiProperty({ example: 'Frontend dasturlash' })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name_uz: string;
+
+  @ApiProperty({ example: 'Frontend Development', required: false })
+  @IsString()
+  @IsOptional()
+  name_en?: string;
+
+  @ApiProperty({ example: 'Фронтенд разработка', required: false })
+  @IsString()
+  @IsOptional()
+  name_ru?: string;
 
   @ApiProperty({ example: 'Frontend dasturlash kursi...' })
   @IsString()
   @IsNotEmpty()
-  description: string;
+  description_uz: string;
+
+  @ApiProperty({ example: 'Frontend development course...', required: false })
+  @IsString()
+  @IsOptional()
+  description_en?: string;
+
+  @ApiProperty({ example: 'Курс фронтенд разработки...', required: false })
+  @IsString()
+  @IsOptional()
+  description_ru?: string;
 
   @ApiProperty({ example: '2 soat' })
   @IsString()
   @IsNotEmpty()
-  duration: string;
+  duration_uz: string;
+
+  @ApiProperty({ example: '2 hours', required: false })
+  @IsString()
+  @IsOptional()
+  duration_en?: string;
+
+  @ApiProperty({ example: '2 часа', required: false })
+  @IsString()
+  @IsOptional()
+  duration_ru?: string;
 
   @ApiProperty({ required: false, example: 3, description: 'Haftada necha kun dars' })
   @IsNumber()
